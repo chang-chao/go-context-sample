@@ -1,0 +1,5 @@
+
+# https://developers.google.com/custom-search/json-api/v1/using_rest
+google:
+  key: "google custom search API KEY"
+  cx: "Search engine ID"

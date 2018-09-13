@@ -18,9 +18,18 @@ import (
 	"net/http"
 	"time"
 	"userip"
+
+	"github.com/spf13/viper"
 )
 
 func main() {
+	viper.SetConfigName("config")
+	viper.AddConfigPath(".")
+	viper.SetConfigType("yaml")
+	if err := viper.ReadInConfig(); err != nil {
+		log.Fatalf("Error reading config file, %s", err)
+	}
+
 	http.HandleFunc("/search", handleSearch)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
@@ -63,7 +72,9 @@ func handleSearch(w http.ResponseWriter, req *http.Request) {
 
 	// Run the Google search and print the results.
 	start := time.Now()
-	results, err := google.Search(ctx, query)
+	searchKey := viper.GetString("google.key")
+	searchEngineID := viper.GetString("google.cx")
+	results, err := google.Search(ctx, query, searchKey, searchEngineID)
 	elapsed := time.Since(start)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

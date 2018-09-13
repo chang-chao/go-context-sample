@@ -24,13 +24,15 @@ type Result struct {
 }
 
 // Search sends query to Google search and returns the results.
-func Search(ctx context.Context, query string) (Results, error) {
+func Search(ctx context.Context, query string, searchKey string, searchEngineID string) (Results, error) {
 	// Prepare the Google Search API request.
-	req, err := http.NewRequest("GET", "https://ajax.googleapis.com/ajax/services/search/web?v=1.0", nil)
+	req, err := http.NewRequest("GET", "https://www.googleapis.com/customsearch/v1", nil)
 	if err != nil {
 		return nil, err
 	}
 	q := req.URL.Query()
+	q.Set("key", searchKey)
+	q.Set("cx", searchEngineID)
 	q.Set("q", query)
 
 	// If ctx is carrying the user IP address, forward it to the server.
