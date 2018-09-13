@@ -11,6 +11,8 @@ package google
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"net/http"
 	"userip"
 )
@@ -53,20 +55,24 @@ func Search(ctx context.Context, query string, searchKey string, searchEngineID 
 		defer resp.Body.Close()
 
 		// Parse the JSON search result.
-		// https://developers.google.com/web-search/docs/#fonje
+		// https://developers.google.com/custom-search/json-api/v1/reference/cse/list
 		var data struct {
-			ResponseData struct {
-				Results []struct {
-					TitleNoFormatting string
-					URL               string
-				}
+			Items []struct {
+				Title string
+				Link  string
 			}
 		}
-		if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
+		bodyBytes, err2 := ioutil.ReadAll(resp.Body)
+		if err2 != nil {
+			return err2
+		}
+		bs := string(bodyBytes)
+		fmt.Println(bs)
+		if err := json.Unmarshal(bodyBytes, &data); err != nil {
 			return err
 		}
-		for _, res := range data.ResponseData.Results {
-			results = append(results, Result{Title: res.TitleNoFormatting, URL: res.URL})
+		for _, res := range data.Items {
+			results = append(results, Result{Title: res.Title, URL: res.Link})
 		}
 		return nil
 	})
